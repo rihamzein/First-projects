@@ -1,0 +1,91 @@
+
+/*Question 1*/
+/*Countries that prefer Jazz Music*/
+
+SELECT 	Genre.Name,
+		Invoice.BillingCountry,
+		COUNT(Track.TrackId) AS Jazz_Tracks
+		
+		
+FROM Track
+JOIN InvoiceLine ON InvoiceLine.TrackId = Track.TrackId
+JOIN Invoice ON Invoice.InvoiceId = InvoiceLine.InvoiceId
+JOIN Genre ON Genre.GenreId = Track.GenreId
+WHERE Track.GenreId = 2
+GROUP BY BillingCountry
+
+
+/**********************************************************************************/
+
+/*QUESTION 2 */
+/*TOP Artists in each genre to be invited in a mixed taste parties or festivals  */
+
+SELECT 
+		Artist.Name,COUNT(Artist.Name) AS No_of_songs,
+
+CASE
+    WHEN COUNT(Artist.Name) > 30 AND Genre.Name = "Rock" THEN 'In TOP 10 Rock Artists'
+	WHEN COUNT(Artist.Name) > 30 AND Genre.Name = "Metal" THEN 'In TOP 10 Metal Artists'
+	WHEN COUNT(Artist.Name) > 30 AND Genre.Name = "Pop" THEN 'In TOP 10 Pop Artists'
+	WHEN COUNT(Artist.Name) > 30 AND Genre.Name = "TV Shows" THEN 'In TOP 10 TV Shows Artists'
+	WHEN COUNT(Artist.Name) > 30 AND Genre.Name = "Latin" THEN 'In TOP 10 Latin Artists'
+	WHEN COUNT(Artist.Name) > 30 AND Genre.Name = "Blues" THEN 'In TOP 10 Blues Artists'
+	WHEN COUNT(Artist.Name) > 30 AND Genre.Name = "Jazz" THEN 'In TOP 10 Jazz Artists'
+	WHEN COUNT(Artist.Name) > 30 AND Genre.Name = "Soundtrack" THEN 'In TOP 10 Soundtrack Artists'
+	WHEN COUNT(Artist.Name) > 30 AND Genre.Name = "Reggae" THEN 'In TOP 10 Reggae Artists'
+	WHEN COUNT(Artist.Name) > 30 AND Genre.Name = "World" THEN 'In TOP 10 World Artists'
+	WHEN COUNT(Artist.Name) > 30 AND Genre.Name = "Alternative & Punk" THEN 'In TOP 10 Alternative & Punk Artists'
+
+
+    ELSE 'NOT IN TOP 10 ARTISTS'
+END AS CLASSIFICATION
+FROM Track
+
+JOIN Genre ON Track.GenreId=  Genre.GenreId
+JOIN Album ON Album.AlbumId = Track.AlbumId
+JOIN Artist ON Album.ArtistId = Artist.ArtistId
+GROUP BY Artist.Name 
+ORDER BY No_of_songs DESC
+
+/**********************************************************************************/
+
+
+/*Question 3*/
+/*Who are the Top 10 purchasers and their favourite genre? */
+SELECT  
+		Invoice.CustomerId,
+		
+		SUM( DISTINCT Total) as The_Total,
+    GROUP_CONCAT( DISTINCT Genre.Name) AS Favourite_genres,
+	GROUP_CONCAT( DISTINCT Artist.Name) AS Favourite_artists	 
+
+FROM Invoice
+JOIN InvoiceLine ON InvoiceLine.InvoiceId = Invoice.InvoiceId
+JOIN Track ON Track.TrackId=InvoiceLine.TrackId
+JOIN Genre ON Genre.GenreId = Track.GenreId
+JOIN Album ON Album.AlbumId = Track.AlbumId
+JOIN Artist ON Artist.ArtistId = Album.ArtistId
+GROUP BY Invoice.CustomerId 
+ORDER BY The_Total DESC
+LIMIT 10
+
+/**********************************************************************************/
+
+
+/*Question 4*/
+/*What are the best seller ARTISTS According to the earnings ?*/
+
+SELECT 		Artist.Name AS Artist_Name,
+	    	COUNT(Track.TrackId)*InvoiceLine.UnitPrice AS Total_Earnings
+FROM Invoice
+JOIN InvoiceLine ON InvoiceLine.InvoiceId = Invoice.InvoiceId
+JOIN Track ON InvoiceLine.TrackId = Track.TrackId
+JOIN Album ON Album.AlbumId = Track.AlbumId
+JOIN Artist ON Artist.ArtistId = Album.ArtistId
+GROUP BY Album.ArtistId 
+ORDER BY Total_Earnings DESC
+LIMIT 25
+
+/**********************************************************************************/
+
+
